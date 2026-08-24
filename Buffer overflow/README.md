@@ -1,4 +1,4 @@
-Buffer Overflow — Complete Notes
+## Buffer Overflow — Complete Notes
 
 When many beginners first encounter Buffer Overflow, they immediately start memorizing things like:
 
